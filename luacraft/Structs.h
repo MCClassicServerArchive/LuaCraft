@@ -6,6 +6,11 @@ struct position {
 	unsigned char heading, pitch;
 };
 
+struct Position {
+	double x, y, z;
+	unsigned char heading, pitch;
+};
+
 struct block {
 	unsigned short x, y, z;
 	unsigned char blocktype, mode, levelblock;

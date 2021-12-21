@@ -11,6 +11,7 @@
 #include "PluginManager.h"
 #include "Network.h"
 #include "Level.h"
+#include "Zone.h"
 #include <vector>
 
 class Network;
@@ -24,11 +25,15 @@ public:
 
 	bool Step();
 	bool releasePlayer(class Player *player);
-	bool addPlayer(class Player *player);
+	bool registerPlayer(class Player *player);
+	void initPlayer(class Player *player, NetworkReturn *Ret);
 	class Player* GetPlayerByName(const char *name);
 	bool Quit;
 	class Network *getNetwork();
 	int getSalt();
+
+	void BeatMinecraft();
+	void BeatFlist();
 	
 	std::vector<Player*> playerList;
 
@@ -43,8 +48,14 @@ public:
 
 	void SendChat(const char *message);
 	void SendChat(const char *message, const char *world);
-	void sendMove(Player *player);
-	void sendBlock(block nblock, char* world);
+	void SendMove(Player *player);
+	void PlaceBlock(block nblock, char* world);
+	block GetBlock(char *world, short x, short y, short z);
+	std::vector<block> *GetBlocksOfType(char *world, char type);
+	
+	int GetWorldSizeX(char *world);
+	int GetWorldSizeY(char *world);
+	int GetWorldSizeZ(char *world);
 
 	void DespawnPlayer(Player *player);
 	void RespawnPlayer(Player *player);
@@ -55,19 +66,38 @@ public:
 	void GetPluginByName(const char *pluginName);
 	void LoadPlugin(const char *fileName);
 
+	char *GetName();
+	char *GetMotd();
+	void SetName(const char *name);
+	void SetMotd(const char *motd);
+
+	int NumPlayers();
+	int NumPlayersInWorld(const char *world);
+	int MaxPlayers();
+
+	std::vector<Player*> GetPlayers();
+	std::vector<Player*> GetPlayersInWorld(const char *world);
+
+	Zone *CreateZone(char *_world, block _block1, block _block2);
+	bool DeleteZone(Zone *_zone);
+
 private:
 
-	char *server_name, *server_motd, *server_port;
+	bool CanBeatFlist;
+	char *server_name, *server_motd, *server_port, *server_hash, *server_website;
 	bool server_public, server_verify_names;
 	int max_players;
 
 	Network *network;
 	unsigned char getFreePlayerId();
-	int salt;
+	long salt;
+
+	time_t timer, time_flist, time_mcnet;
 
 	class Player* getPlayerById(unsigned char id);
 
 	HANDLE srvMutex;
+	HANDLE mainListMutex;
 };
 
 #endif

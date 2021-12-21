@@ -16,6 +16,8 @@
 	#include <arpa/inet.h>
 	#include <sys/socket.h>	
 	#include <netinet/in.h>
+	#include <sys/types.h>
+#define SOCKET int
 #define closesock(sock) close(sock)
 #endif
 
@@ -28,6 +30,9 @@ public:
 
 	NetworkReturn *acceptConnections();
 
+	char *HttpPost(char *hostname, char *ext, bool getData, char *data, ...);
+	char *HttpGet(char *hostname, char *ext, bool getData, char *data, ...);
+
 	void run();
 
 	unsigned short nhtons(unsigned short to);
@@ -35,7 +40,7 @@ public:
 private:
 	typedef int socklen_t;
 	SOCKET listener_sock;
-	addrinfo *heartBeat;
+	struct addrinfo sockAddr;
 	fd_set master;
 	int hisock;
 };

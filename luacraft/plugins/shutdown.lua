@@ -14,9 +14,11 @@ function HandleChat(player)
 				player:SendMessage("&4Are you sure you want to shut down the server?");
 				player:SendMessage("&4Type &e/shutdown &4again to confirm.");
 				player.WantsShutdown = true;
+				player:SupressChat();
 			end
 		else
 			player:SendMessage("&eYou must be an OP!");
+			player:SupressChat();
 		end
 	end
 	

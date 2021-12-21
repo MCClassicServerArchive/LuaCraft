@@ -1,5 +1,6 @@
 #include "Various.h"
 #include "md5.h"
+#include "Defines.h"
 #include "Player.h"
 
 #include <list>
@@ -11,33 +12,53 @@ Player::Player(Server *srv, const char id_byte, SOCKET sockn) {
 	this->strings_front = NULL;
 	this->numbers_back = NULL;
 	this->numbers_front = NULL;
-	this->CanDelete = false;
+	this->CanDelete = true;
 	this->isVisible = true;
 	this->isHidden = false;
 	this->isHidden = false;
-	this->can_recv = false;
+	this->is_initialized = false;
+	this->self_destruct = false;
 	this->server = srv;
 	this->id = id_byte;
 	this->sock = sockn;
 	this->name = "";
 	this->ip = "";
+	this->supressChat = false;
 	this->op = false;
 	this->pendingRelease = false;
 	this->IsInMap = false;
 	this->has_map = false;
+#ifdef _WIN32
 	this->localListMutex = CreateMutex(NULL, false, NULL);
 	this->packetQueueMutex = CreateMutex(NULL, false, NULL);
-	//We will need some macros later, for *nix
+#else
+	this->localListMutex = PTHREAD_MUTEX_INITIALIZER;
+	this->packetQueueMutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
 }
 
 Player::~Player() {
+	unsigned char count = 0;
 	// Call hook
-	this->server->plugins->CallHook("OnPlayerLeave", this);
-	while(!this->CanDelete) Sleep(1);
+	if(this->is_initialized)
+		this->server->plugins->CallHook("OnPlayerLeave", this);
+	/* No use calling OnPlayerLeave if they haven't even logged in yet */
+
+	while(!this->CanDelete && count < 120) { 
+		/* Give it 2 minutes, otherwise it's an infinite loop */
+		Sleep(1000);
+		count++;
+	}
+
 }
 
 void Player::StartThread() {
+#ifdef _WIN32
 	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)playerThread, (void*)this, 0, NULL);
+#else
+	if(int rc = pthread_create(&thread2, NULL, &functionC, NULL))
+		Console::PrintText("Thread creation failed: %d", rc);
+#endif
 }
 
 unsigned char Player::getId() {
@@ -84,6 +105,11 @@ void Player::removeLocalPlayer(class Player *player) {
 }
 
 void Player::handlePacket(const char *buffer) {
+	if(WaitForSingleObject(this->localListMutex, 1000) == WAIT_TIMEOUT) {
+		this->sendKick("Error: Could not claim mutex while handling packet");
+		delete this;
+		return;
+	}
 	switch(*buffer) { //first byte of *buffer
 		case PACK_CODE_IN_HANDSHAKE:
 			this->handleLoginPacket(buffer);
@@ -101,6 +127,7 @@ void Player::handlePacket(const char *buffer) {
 			if(this->IsInMap) this->handleChatPacket(buffer);
 		break;
 	}
+	ReleaseMutex(this->localListMutex);
 }
 
 void Player::handleChatPacket(const char *buffer) {
@@ -169,39 +196,49 @@ void Player::playerThread(void *params) {
 	class Player *_this = (Player*)params;
 	std::list<PendingPacket*>::iterator iter;
 	const char *buffer;
+	bool doonce = true;
 
-	// Get initial packet
+	// Get initial packet.
 	buffer = (const char*) _this->getPacket();
 
 	if(*buffer == PACK_CODE_IN_HANDSHAKE) {
-		do {
-			_this->handlePacket(buffer);
-			_this->can_recv = true; 
+		if(*(buffer+1) == PROTO_VER) {
+			do {
+				_this->handlePacket(buffer);
+				_this->is_initialized = true; 
+				if(doonce && !_this->self_destruct) {
+					_this->CanDelete = false;
+					_this->server->registerPlayer(_this);
+					doonce = false;
+				}
+				/* I got to thinking. It ONLY needs to claim its local list mutex when it's
+					running handlePacket (handlePacket is the only time it uses its
+					local Player vector. So the mutexes are moved to handlePacket()*/
 
-			// Release mutex, free buffer, and give other threads a chance to snatch the mutex
+				free((void*)buffer);
+				if(_this->self_destruct)
+					delete _this;
+				Sleep(5);
+				
+				// Send packets in queue
+				_this->SendPackets();
+
+				// Get new packet
+				buffer = (const char*)_this->getPacket();
+			} while(_this->validNonLoginPacket(*buffer));
 			ReleaseMutex(_this->localListMutex);
-			free((void*)buffer);
-			Sleep(5);
-			WaitForSingleObject(_this->localListMutex, INFINITE);
-
-			// Send packets in queue
-			_this->SendPackets();
-
-			// Get new packet
-			buffer = (const char*)_this->getPacket();
-		} while(_this->validNonLoginPacket(*buffer));
-
-		ReleaseMutex(_this->localListMutex);
-		_this->can_recv = false;
-		
-		if(buffer[0] == PACK_CODE_IN_HANDSHAKE) { //Login should only be parsed once
-			Console::PrintText("Duplicate login at %s", _this->name);
-			_this->sendKick("You logged in from a different computer!");
-		} else if(buffer[0] == PACKET_BROKE_STREAM) {
-			Console::PrintText("Stream broken at %s", _this->name);
-			_this->sendKick("Network Error!"); 
+			
+			if(buffer[0] == PACK_CODE_IN_HANDSHAKE) { //Login should only be parsed once
+				Console::PrintText("Duplicate login at %s", _this->name);
+				_this->sendKick("You logged in from a different computer!");
+			} else if(buffer[0] == PACKET_BROKE_STREAM) {
+				Console::PrintText("Stream broken at %s", _this->name);
+				_this->sendKick("Network Error!"); 
+			} else {
+				_this->server->releasePlayer(_this);
+			}
 		} else {
-			_this->server->releasePlayer(_this);
+			_this->sendKick("Wrong protocol version.");
 		}
 	} else {
 		_this->sendKick("Wrong first packet.");
@@ -320,10 +357,10 @@ bool Player::sendWelcome() {
 	srvName[63] = 0;
 	srvMotd[63] = 0;
 
-	short nameLen = strlength(this->server->getServerName()+1);
+	short nameLen = strlength(this->server->getServerName());
 	if(nameLen > sizeof(srvName)) nameLen = sizeof(srvName);
 
-	short motdLen = strlength(this->server->getServerMotd()+1);
+	short motdLen = strlength(this->server->getServerMotd());
 	if(motdLen > sizeof(srvMotd)) motdLen = sizeof(srvMotd);
 
 	memcpy(srvName, this->server->getServerName(), nameLen);
@@ -336,6 +373,8 @@ bool Player::sendWelcome() {
 
 	this->sendPacket((const char*)packet, PACKLEN_OUT_SRVIDENTIFY);
 	
+	free(packet);
+
 	return true;
 }
 
@@ -364,7 +403,7 @@ void Player::SendMessage(const char *message) {
 bool Player::sendLevel(Level *lvl) {
 	unsigned long sent = 0, left, total;
 	unsigned short chunksize;
-	unsigned char *mapSend, percentage, *mapBuf, *passMapBuf;
+	unsigned char *mapSend, percentage, *mapBuf;
 
 	mapBuf = (unsigned char*)malloc(PACKLEN_OUT_MAPCHUNK);
 
@@ -390,32 +429,27 @@ bool Player::sendLevel(Level *lvl) {
 
 		chunksize = this->server->getNetwork()->nhtons(chunksize);
 		memcpy(mapBuf+1, &chunksize, sizeof(short));
-
-		passMapBuf = (unsigned char*)malloc(PACKLEN_OUT_MAPCHUNK);
-		memcpy(passMapBuf, mapBuf, PACKLEN_OUT_MAPCHUNK);
 		
-		this->sendPacket((const char*)passMapBuf, PACKLEN_OUT_MAPCHUNK);
+		this->sendPacket((const char*)mapBuf, PACKLEN_OUT_MAPCHUNK);
 
 		Sleep(2);
 	}
 	
 	mapBuf[0] = (unsigned char)PACK_CODE_OUT_MAPFINISH;
 
-	chunksize = lvl->getDimX();
+	chunksize = this->server->getNetwork()->nhtons(lvl->getDimX());
 	memcpy(mapBuf+1, &chunksize, sizeof(short));
 
-	chunksize = lvl->getDimY();
+	chunksize = this->server->getNetwork()->nhtons(lvl->getDimY());
 	memcpy(mapBuf+3, &chunksize, sizeof(short));
 
-	chunksize = lvl->getDimZ();
+	chunksize = this->server->getNetwork()->nhtons(lvl->getDimZ());
 	memcpy(mapBuf+5, &chunksize, sizeof(short));
 
-	passMapBuf = (unsigned char*)malloc(PACKLEN_OUT_MAPFINISH);
-	memcpy(passMapBuf, mapBuf, PACKLEN_OUT_MAPFINISH);
+
+	this->sendPacket((const char*)mapBuf, PACKLEN_OUT_MAPFINISH);
 
 	free(mapBuf);
-
-	this->sendPacket((const char*)passMapBuf, PACKLEN_OUT_MAPFINISH);
 
 	free(mapSend);
 
@@ -428,10 +462,22 @@ bool Player::sendLevel(Level *lvl) {
 	pos.heading = lvl->getRotX();
 	pos.pitch = lvl->getRotY();
 	
-	this->pos = pos;
-	this->savedpos = pos;
+	this->newpos = pos;
 
-	this->Teleport(&pos);
+	if(this->isVisible)
+		this->server->SendMove(this);
+
+	this->pos.heading = 0;
+	this->pos.pitch = 0;
+	this->pos.x = 0;
+	this->pos.y = 0;
+	this->pos.z = 0;
+
+	this->savedpos = this->GetPos();
+
+	this->sendMovementTeleport(255, this->newpos);
+
+	this->pos = this->newpos;
 
 	this->IsInMap = true;
 
@@ -454,7 +500,7 @@ bool Player::sendSpawnPack(unsigned char id_byte, char *name, position pos) {
 
 	buffer[1] = id_byte;
 
-	memcpy(buffer+2, name, strlength(name)+1);
+	memcpy(buffer+2, name, strlength(name));
 
 	memcpy(buffer+66, &pos.x, 2);
 	memcpy(buffer+68, &pos.y, 2);
@@ -479,7 +525,7 @@ bool Player::sendSpawns() {
 		if(strcmp((*iter)->GetWorld(), this->GetWorld()) == 0) {
 			if(this->isHidden == false)
 				(*iter)->sendSpawnPack(this->id, this->DisplayName, this->pos);
-			if(((*iter)->id != this->id) && ((*iter)->isHidden == false))
+			if((*iter)->isHidden == false)
 				this->sendSpawnPack((*iter)->id, (*iter)->DisplayName, (*iter)->pos);
 		}
 	}
@@ -494,13 +540,13 @@ bool Player::SendBlockChange(block nblock) {
 	packet[0] = PACK_CODE_OUT_BLOCK;
 	
 	tmp = this->server->getNetwork()->nhtons(nblock.x);
-	memcpy(packet+1, &tmp, PACK_SHORTLEN);
+	memcpy(packet+1, &tmp, sizeof(short));
 
 	tmp = this->server->getNetwork()->nhtons(nblock.y);
-	memcpy(packet+3, &tmp, PACK_SHORTLEN);
+	memcpy(packet+3, &tmp, sizeof(short));
 
 	tmp = this->server->getNetwork()->nhtons(nblock.z);
-	memcpy(packet+5, &tmp, PACK_SHORTLEN);
+	memcpy(packet+5, &tmp, sizeof(short));
 
 
 	if(nblock.blocktype > 0x31)
@@ -511,41 +557,28 @@ bool Player::SendBlockChange(block nblock) {
 
 	packet[7] = nblock.blocktype;
 
-	this->sendPacket((const char*)packet, PACKLEN_OUT_SENDBLOCK);
+	WaitForSingleObject(this->packetQueueMutex, INFINITE);
+	this->PacketQueue.push_back(new PendingPacket(PACKLEN_OUT_SENDBLOCK, (char*)packet, true));
+	ReleaseMutex(this->packetQueueMutex);
+
 	return true;
 }
 
-bool Player::sendMovement(unsigned char id_byte, position oldpos, position newpos_other) {
-	bool posnc = (oldpos.x == newpos_other.x && oldpos.y == newpos_other.y && oldpos.z == newpos_other.z);
-	bool rotnc = (oldpos.heading == newpos_other.heading && oldpos.pitch == newpos_other.pitch); 
-	
-	if(false) {//Packet type 0x0B
-		return this->sendMovementRot(id_byte, oldpos, newpos_other);
-	} 
-	else { // Packet Type 0x09
-		return this->sendMovementHeadRot(id_byte, oldpos, newpos_other);
-	}
-	return false;
-}
-
-bool Player::sendMovementHeadRot(unsigned char id_byte, position oldpos, position newpos_other) {
+bool Player::sendMovementHeadRot(unsigned char id_byte, position delta) {
 	unsigned char *packet;
 	packet = (unsigned char*)malloc(PACKLEN_OUT_MOVEANDHEAD);
 	unsigned short tmp;
-	packet[0] = PACK_CODE_OUT_TELEPORT;
+	packet[0] = PACK_CODE_OUT_MOVEANDHEAD;
 	packet[1] = id_byte;
 	
-	tmp = this->server->getNetwork()->nhtons(newpos_other.x);
-	memcpy(packet+2, &tmp, PACK_SHORTLEN);
+	packet[2] = (char)delta.x;
 
-	tmp = this->server->getNetwork()->nhtons(newpos_other.y);
-	memcpy(packet+4, &tmp, PACK_SHORTLEN);
+	packet[3] = (char)delta.y;
 
-	tmp = this->server->getNetwork()->nhtons(newpos_other.z);
-	memcpy(packet+6, &tmp, PACK_SHORTLEN);
+	packet[4] = (char)delta.z;
 
-	packet[8] = newpos_other.heading;
-	packet[9] = newpos_other.pitch;
+	packet[5] = delta.heading;
+	packet[6] = delta.pitch;
 
 	WaitForSingleObject(this->packetQueueMutex, INFINITE);
 	this->PacketQueue.push_back(new PendingPacket(PACKLEN_OUT_MOVEANDHEAD, (char*)packet, true));
@@ -554,20 +587,65 @@ bool Player::sendMovementHeadRot(unsigned char id_byte, position oldpos, positio
 	return true;
 }
 
-bool Player::sendMovementRot(unsigned char id_byte, position oldpos, position newpos_other) {
+bool Player::sendMovementRot(unsigned char id_byte, position delta) {
 	unsigned char *packet;
 	packet = (unsigned char*)malloc(PACKLEN_OUT_HEADING);
 
 	packet[0] = PACK_CODE_OUT_HEADING;
 	packet[1] = id_byte;
 
-	packet[2] = newpos_other.heading;
-	packet[3] = newpos_other.pitch;
+	packet[2] = delta.heading;
+	packet[3] = delta.pitch;
 
 	WaitForSingleObject(this->packetQueueMutex, INFINITE);
 	this->PacketQueue.push_back(new PendingPacket(PACKLEN_OUT_HEADING, (char*)packet, true));
 	ReleaseMutex(this->packetQueueMutex);
 
+	return true;
+}
+
+bool Player::sendMovementHead(unsigned char id_byte, position delta) {
+	unsigned char *packet;
+	packet = (unsigned char*)malloc(PACKLEN_OUT_MOVE);
+
+	packet[0] = PACK_CODE_OUT_MOVE;
+	packet[1] = id_byte;
+
+	packet[2] = (char)delta.x;
+	packet[3] = (char)delta.y;
+	packet[4] = (char)delta.z;
+
+	WaitForSingleObject(this->packetQueueMutex, INFINITE);
+	this->PacketQueue.push_back(new PendingPacket(PACKLEN_OUT_MOVE, (char*)packet, true));
+	ReleaseMutex(this->packetQueueMutex);
+
+	return true;
+}
+
+bool Player::sendMovementTeleport(unsigned char id_byte, position newpos_other) {
+	unsigned char *packet;
+	short tmp;
+	packet = (unsigned char*)malloc(PACKLEN_OUT_TELEPORT);
+
+	packet[0] = PACK_CODE_OUT_TELEPORT;
+	packet[1] = id_byte;
+
+	tmp = this->server->getNetwork()->nhtons(newpos_other.x);
+	memcpy(packet+2, &tmp, sizeof(short));
+
+	tmp = this->server->getNetwork()->nhtons(newpos_other.y);
+	memcpy(packet+4, &tmp, sizeof(short));
+
+	tmp = this->server->getNetwork()->nhtons(newpos_other.z);
+	memcpy(packet+6, &tmp, sizeof(short));
+
+	packet[8] = newpos_other.heading;
+	packet[9] = newpos_other.pitch;
+
+	WaitForSingleObject(this->packetQueueMutex, INFINITE);
+	this->PacketQueue.push_back(new PendingPacket(PACKLEN_OUT_TELEPORT, (char*)packet, true));
+	ReleaseMutex(this->packetQueueMutex);
+	
 	return true;
 }
 
@@ -584,6 +662,10 @@ bool Player::sendKick(const char *msg) {
 
 	// Just send the kick packet from here - this case is special.
 	send(this->sock, (const char*)packet, PACKLEN_OUT_DISCONNECT, NULL);
+	
+	free(packet);
+
+	Sleep(50);
 
 	this->server->releasePlayer(this);
 
@@ -622,7 +704,7 @@ char *Player::GetDisplayName() {
 	return this->DisplayName;
 }
 void Player::SetName(const char *name) {
-	this->name = (char*)malloc(strlength(name));
+	this->name = (char*)malloc(strlength(name)+1);
 	strcpy(this->name, name);
 }
 void Player::SetDisplayName(const char *name) {
@@ -642,18 +724,72 @@ bool Player::GetOP() {
 }
 void Player::SetOP(bool OP) {
 	this->op = OP;
+	if(OP) {
+		WaitForSingleObject(this->packetQueueMutex, INFINITE);
+		this->PacketQueue.push_back(new PendingPacket(2, "\x0f\x64", false));
+		ReleaseMutex(this->packetQueueMutex);
+	} else {
+		WaitForSingleObject(this->packetQueueMutex, INFINITE);
+		this->PacketQueue.push_back(new PendingPacket(2, "\x0f\x00", false));
+		ReleaseMutex(this->packetQueueMutex);
+	}
 }
+void Player::Kill() {
+	this->self_destruct = true;
+}
+
 void Player::Kick(const char *msg) {
 	this->sendKick(msg);
 }
+void Player::SetMOTD(const char *motd) {
+	unsigned char *packet;
+	char srvName[64], srvMotd[64];
 
+	packet = (unsigned char*)malloc(PACKLEN_OUT_SRVIDENTIFY);
+
+	packet[0] = PACK_CODE_IN_HANDSHAKE;
+	packet[1] = PROTO_VER;
+
+	memset(srvName, 0x20, sizeof(srvName));
+	memset(srvMotd, 0x20, sizeof(srvMotd));
+	srvName[63] = 0;
+	srvMotd[63] = 0;
+
+	short nameLen = strlength(this->server->getServerName()+2);
+	if(nameLen > sizeof(srvName)) nameLen = sizeof(srvName);
+
+	short motdLen = strlength(motd+2);
+	if(motdLen > sizeof(srvMotd)) motdLen = sizeof(srvMotd);
+
+	memcpy(srvName, this->server->getServerName(), nameLen);
+	memcpy(srvMotd, motd, motdLen);
+
+	memcpy(packet+2, srvName, 64);
+	memcpy(packet+2+64, srvMotd, 64);
+
+	packet[2+64+64] = (this->GetOP() ? 0x64 : 0x00);
+
+	this->sendPacket((const char*)packet, PACKLEN_OUT_SRVIDENTIFY);
+	
+	free(packet);
+}
 bool Player::SetWorld(const char *worldName) {
+	if(this->IsInMap) {
+		this->server->DespawnPlayer(this);
+		std::vector<class Player*>::iterator iter;
+		for(iter = localPlayerList.begin(); iter != localPlayerList.end(); ++iter) {
+			if(strcmp((*iter)->GetWorld(), this->GetWorld()) == 0) {
+				this->sendDespawnPack((*iter)->GetID());
+			}
+		}
+	}
 	Level *tempLevel = this->server->GetLevelByName(worldName);
 	if(!tempLevel)
 		return false;
 	this->levelStr = (char*)worldName;
 	this->level = tempLevel;
 	this->sendLevel(tempLevel);
+
 	return true;
 }
 char *Player::GetWorld() {
@@ -674,65 +810,131 @@ void Player::SetVisible(bool state) {
 	}
 	this->isVisible = state;
 }
-position *Player::GetPos() {
-	return &this->pos;
+Position Player::GetPos() {
+	Position retPos;
+	retPos.heading = this->pos.heading;
+	retPos.pitch = this->pos.pitch;
+	retPos.x = this->pos.x;
+	retPos.y = this->pos.y;
+	retPos.z = this->pos.z;
+	retPos.x = retPos.x / 32;
+	retPos.y = retPos.y / 32;
+	retPos.z = retPos.z / 32;
+	return retPos;
 }
-position *Player::GetNewPos() {
-	return &this->newpos;
+Position Player::GetNewPos() {
+	Position retPos;
+	retPos.heading = this->newpos.heading;
+	retPos.pitch = this->newpos.pitch;
+	retPos.x = this->newpos.x;
+	retPos.y = this->newpos.y;
+	retPos.z = this->newpos.z;
+	retPos.x = retPos.x / 32;
+	retPos.y = retPos.y / 32;
+	retPos.z = retPos.z / 32;
+	return retPos;
 }
-short Player::GetX() {
-	return this->pos.x;
+double Player::GetX() {
+	double ret = this->pos.x;
+	ret = ret / 32;
+	return ret;
 }
-short Player::GetY() {
-	return this->pos.y;
+double Player::GetY() {
+	double ret = this->pos.y;
+	ret = ret / 32;
+	return ret;
 }
-short Player::GetZ() {
-	return this->pos.z;
+double Player::GetZ() {
+	double ret = this->pos.z;
+	ret = ret / 32;
+	return ret;
 }
-short Player::GetNewX() {
-	return this->newpos.x;
+double Player::GetNewX() {
+	double ret = this->newpos.x;
+	ret = ret / 32;
+	return ret;
 }
-short Player::GetNewY() {
-	return this->newpos.y;
+double Player::GetNewY() {
+	double ret = this->newpos.y;
+	ret = ret / 32;
+	return ret;
 }
-short Player::GetNewZ() {
-	return this->newpos.z;
+double Player::GetNewZ() {
+	double ret = this->newpos.z;
+	ret = ret / 32;
+	return ret;
 }
-void Player::SetPos(position *posToSet) {
-	this->pos = *posToSet;
+void Player::SetPos(Position *posToSet) {
+	Position tempPos;
+	position newPos;
+
+	tempPos = *posToSet;
+
+	tempPos.x *= 32;
+	tempPos.y *= 32;
+	tempPos.z *= 32;
+
+	newPos.heading = posToSet->heading;
+	newPos.pitch = posToSet->pitch;
+
+	newPos.x = tempPos.x;
+	newPos.y = tempPos.y;
+	newPos.z = tempPos.z;
+
+	this->newpos = newPos;
 	if(this->isVisible)
-		this->server->sendMove(this);
+		this->server->SendMove(this);
+	this->pos = newPos;
 }
-void Player::SetX(short xToSet) {
+void Player::SetX(double xToSet) {
+	xToSet = xToSet * 32;
 	this->pos.x = xToSet;
 	if(this->isVisible)
-		this->server->sendMove(this);
+		this->server->SendMove(this);
 }
-void Player::SetY(short yToSet) {
+void Player::SetY(double yToSet) {
+	yToSet = yToSet * 32;
 	this->pos.y = yToSet;
 	if(this->isVisible)
-		this->server->sendMove(this);
+		this->server->SendMove(this);
 }
-void Player::SetZ(short zToSet) {
+void Player::SetZ(double zToSet) {
+	zToSet = zToSet * 32;
 	this->pos.z = zToSet;
 	if(this->isVisible)
-		this->server->sendMove(this);
+		this->server->SendMove(this);
 }
-void Player::Teleport(position *targetPos) {
-	this->pos = *targetPos;
+void Player::Teleport(Position *targetPos) {
+	Position tempPos;
+	position newPos;
+
+	tempPos = *targetPos;
+
+	tempPos.x *= 32;
+	tempPos.y *= 32;
+	tempPos.z *= 32;
+
+	newPos.heading = targetPos->heading;
+	newPos.pitch = targetPos->pitch;
+
+	newPos.x = tempPos.x;
+	newPos.y = tempPos.y;
+	newPos.z = tempPos.z;
+
+	this->newpos = newPos;
 	if(this->isVisible)
-		this->server->sendMove(this);
-	this->sendMovement(255, this->getPos(), *targetPos);
+		this->server->SendMove(this);
+	this->sendMovementTeleport(255, this->getNewPos());
+	this->pos = newPos;
 }
 void Player::SendToPlayer(Player *targetPly) {
-	this->Teleport(targetPly->GetPos());
+	this->Teleport(&targetPly->GetPos());
 }
 void Player::Hide(bool state) {
 	if(state) {
-		this->savedpos = this->pos;
+		this->savedpos = this->GetPos();
 		this->server->DespawnPlayer(this);
 	} else {
-		this->pos = this->savedpos;
 		this->server->RespawnPlayer(this);
 		this->Teleport(&this->savedpos);	// Just in case.
 	}
@@ -748,7 +950,7 @@ void Player::SetBool(char *name, bool value) {
 		local = local->next;
 	}
 	local = new PlayerBool();
-	local->name = (char*)malloc(strlength(name));
+	local->name = (char*)malloc(strlength(name)+1);
 	strcpy(local->name, name);
 	local->value = value;
 	if(this->bools_back)
@@ -827,4 +1029,8 @@ char *Player::GetString(char *name) {
 
 block Player::GetLastBlock() {
 	return this->blockpos;
+}
+
+void Player::SupressChat() {
+	this->supressChat = true;
 }

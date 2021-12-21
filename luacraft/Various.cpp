@@ -4,14 +4,47 @@
 
 #include "libs/zlib.h"
 #include <cstring>
+#include <stdlib.h>
 #include <cctype>
 #include "Various.h"
+#include "Defines.h"
 
 // Return the length of a string
 int strlength(const char* str) {
 	int i;
 	for(i=0; str[i]; i++);
 	return i;
+}
+
+char *URIEncode(char *str) {
+	char symbols[] = {'!','@','$', '%', '#', '^', '&', '(', ')', ' ', '+', '_', '-', '{', '}', '?', ',', '.', '<', '=', '>', '\'', 0};
+	char *replacements = {"%21%40%24%25%23%5E%26%28%29%20%2B%5F%2D%7B%7E%3F%2C%2E%3C%3D%3E%27"};
+	char *chr, *string;
+	bool symbol;
+	int strlen;
+	string = (char*)malloc(1*sizeof(char));
+	strlen = 0;
+
+	for(int i = 0; str[i]; i++) { // Loop through each character in the string
+		symbol = false;
+		for(int ii = 0; symbols[ii]; ii++) {// Loop through the symbols and see if its in there
+			if(str[i] == symbols[ii]) {
+				string = (char*)realloc(string, strlen+3*sizeof(char)+1); // Add enough room for the replacement
+				memcpy(string+strlen, replacements + (ii *3), 3); // Copy the replacement for it
+				symbol = true;
+				strlen += 3;
+			}
+		}
+		if(!symbol) { // So there was no replacement. Copy the orignal test
+			string = (char*)realloc(string, strlen+1*sizeof(char)+1); // Add a char to it.
+			string[strlen] = str[i];
+			strlen++;
+		}
+	}
+	
+	string[strlen] = 0;
+
+	return string;
 }
 
 /* Compress pSrc and save in pDest. */
@@ -92,4 +125,18 @@ unsigned char *memstr(unsigned char *mem, unsigned long memLen, unsigned char *s
 	}
 
 	return NULL;
+}
+
+char *stripColors(char *str) {
+	char *chr;
+	chr = strchr(str, '&');
+	while(chr != NULL) {
+		strcpy(chr, chr+2);
+		chr = strchr(str, '&');
+	}
+	return str;
+}
+
+void makeLower(char *str) {
+	for(int i=0; str[i]; i++) str[i] = (char)tolower((int)str[i]);
 }

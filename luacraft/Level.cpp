@@ -1,4 +1,8 @@
+#ifdef _WIN32
 #include <winsock2.h>
+#else
+#include <netinet/in.h>
+#endif
 #include "Defines.h"
 #include "Various.h"
 #include "Console.h"
@@ -13,7 +17,7 @@ Level::~Level() {
 /* and store in unsigned char *serverLevel. */
 //Level::Level(const char *fileName, bool restore) {
 Level::Level(const char *tempMapName) {
-	char *fileName = (char*)malloc(strlength(tempMapName)+5);
+	char *fileName = (char*)malloc(strlength(tempMapName)+6);
 	sprintf(fileName, "maps/%s", tempMapName);
 
 	this->FileName = fileName;

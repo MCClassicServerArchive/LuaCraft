@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "Console.h"
+#include "Defines.h"
 
 // Display splash screen (called during startup)
 void Console::PrintSplash() {
@@ -44,6 +45,8 @@ void Console::PrintText(const char *format, ...) {
 	va_start(args, format);
 	vsprintf(vstr, format, args);
 	va_end(args);
+
+	//printf("%s\n", vstr);
 
 	printf("[%d:%d:%d] %s\n", localTime->tm_hour, localTime->tm_min, localTime->tm_sec, vstr);
 }

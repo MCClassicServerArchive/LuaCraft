@@ -16,3 +16,14 @@ function HandleMovement(player)
 	end
 end
 GAMEMODE:AddHook("OnPlayerMove", "HandleMovement");
+
+
+
+-- THIS COMMAND IS TEMPORARY - FOR TESTING PURPOSES ONLY
+GAMEMODE:AddChatCommand("pos", "MyPos");
+function MyPos(player, param)
+	player:SendMessage("&eYour position:");
+	player:SendMessage("&e  X:&f "..player:GetX());
+	player:SendMessage("&e  Y:&f "..player:GetY());
+	player:SendMessage("&e  Z:&f "..player:GetZ());
+end

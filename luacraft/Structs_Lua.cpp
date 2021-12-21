@@ -1,6 +1,6 @@
 /*
 ** Lua binding: Structs
-** Generated automatically by tolua++-1.0.92 on 04/07/10 19:53:40.
+** Generated automatically by tolua++-1.0.92 on 04/19/10 16:32:56.
 */
 
 #ifndef __cplusplus
@@ -19,14 +19,14 @@ TOLUA_API int  tolua_Structs_open (lua_State* tolua_S);
 static void tolua_reg_types (lua_State* tolua_S)
 {
  tolua_usertype(tolua_S,"block");
- tolua_usertype(tolua_S,"position");
+ tolua_usertype(tolua_S,"Position");
 }
 
-/* get function: x of class  position */
-#ifndef TOLUA_DISABLE_tolua_get_position_unsigned_x
-static int tolua_get_position_unsigned_x(lua_State* tolua_S)
+/* get function: x of class  Position */
+#ifndef TOLUA_DISABLE_tolua_get_Position_unsigned_x
+static int tolua_get_Position_unsigned_x(lua_State* tolua_S)
 {
-  position* self = (position*)  tolua_tousertype(tolua_S,1,0);
+  Position* self = (Position*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'x'",NULL);
 #endif
@@ -35,28 +35,28 @@ static int tolua_get_position_unsigned_x(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* set function: x of class  position */
-#ifndef TOLUA_DISABLE_tolua_set_position_unsigned_x
-static int tolua_set_position_unsigned_x(lua_State* tolua_S)
+/* set function: x of class  Position */
+#ifndef TOLUA_DISABLE_tolua_set_Position_unsigned_x
+static int tolua_set_Position_unsigned_x(lua_State* tolua_S)
 {
-  position* self = (position*)  tolua_tousertype(tolua_S,1,0);
+  Position* self = (Position*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'x'",NULL);
   if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->x = ((unsigned short)  tolua_tonumber(tolua_S,2,0))
+  self->x = ((unsigned double)  tolua_tonumber(tolua_S,2,0))
 ;
  return 0;
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* get function: y of class  position */
-#ifndef TOLUA_DISABLE_tolua_get_position_unsigned_y
-static int tolua_get_position_unsigned_y(lua_State* tolua_S)
+/* get function: y of class  Position */
+#ifndef TOLUA_DISABLE_tolua_get_Position_unsigned_y
+static int tolua_get_Position_unsigned_y(lua_State* tolua_S)
 {
-  position* self = (position*)  tolua_tousertype(tolua_S,1,0);
+  Position* self = (Position*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'y'",NULL);
 #endif
@@ -65,28 +65,28 @@ static int tolua_get_position_unsigned_y(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* set function: y of class  position */
-#ifndef TOLUA_DISABLE_tolua_set_position_unsigned_y
-static int tolua_set_position_unsigned_y(lua_State* tolua_S)
+/* set function: y of class  Position */
+#ifndef TOLUA_DISABLE_tolua_set_Position_unsigned_y
+static int tolua_set_Position_unsigned_y(lua_State* tolua_S)
 {
-  position* self = (position*)  tolua_tousertype(tolua_S,1,0);
+  Position* self = (Position*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'y'",NULL);
   if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->y = ((unsigned short)  tolua_tonumber(tolua_S,2,0))
+  self->y = ((unsigned double)  tolua_tonumber(tolua_S,2,0))
 ;
  return 0;
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* get function: z of class  position */
-#ifndef TOLUA_DISABLE_tolua_get_position_unsigned_z
-static int tolua_get_position_unsigned_z(lua_State* tolua_S)
+/* get function: z of class  Position */
+#ifndef TOLUA_DISABLE_tolua_get_Position_unsigned_z
+static int tolua_get_Position_unsigned_z(lua_State* tolua_S)
 {
-  position* self = (position*)  tolua_tousertype(tolua_S,1,0);
+  Position* self = (Position*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'z'",NULL);
 #endif
@@ -95,28 +95,28 @@ static int tolua_get_position_unsigned_z(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* set function: z of class  position */
-#ifndef TOLUA_DISABLE_tolua_set_position_unsigned_z
-static int tolua_set_position_unsigned_z(lua_State* tolua_S)
+/* set function: z of class  Position */
+#ifndef TOLUA_DISABLE_tolua_set_Position_unsigned_z
+static int tolua_set_Position_unsigned_z(lua_State* tolua_S)
 {
-  position* self = (position*)  tolua_tousertype(tolua_S,1,0);
+  Position* self = (Position*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'z'",NULL);
   if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->z = ((unsigned short)  tolua_tonumber(tolua_S,2,0))
+  self->z = ((unsigned double)  tolua_tonumber(tolua_S,2,0))
 ;
  return 0;
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* get function: heading of class  position */
-#ifndef TOLUA_DISABLE_tolua_get_position_unsigned_heading
-static int tolua_get_position_unsigned_heading(lua_State* tolua_S)
+/* get function: heading of class  Position */
+#ifndef TOLUA_DISABLE_tolua_get_Position_unsigned_heading
+static int tolua_get_Position_unsigned_heading(lua_State* tolua_S)
 {
-  position* self = (position*)  tolua_tousertype(tolua_S,1,0);
+  Position* self = (Position*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'heading'",NULL);
 #endif
@@ -125,11 +125,11 @@ static int tolua_get_position_unsigned_heading(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* set function: heading of class  position */
-#ifndef TOLUA_DISABLE_tolua_set_position_unsigned_heading
-static int tolua_set_position_unsigned_heading(lua_State* tolua_S)
+/* set function: heading of class  Position */
+#ifndef TOLUA_DISABLE_tolua_set_Position_unsigned_heading
+static int tolua_set_Position_unsigned_heading(lua_State* tolua_S)
 {
-  position* self = (position*)  tolua_tousertype(tolua_S,1,0);
+  Position* self = (Position*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'heading'",NULL);
@@ -142,11 +142,11 @@ static int tolua_set_position_unsigned_heading(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* get function: pitch of class  position */
-#ifndef TOLUA_DISABLE_tolua_get_position_unsigned_pitch
-static int tolua_get_position_unsigned_pitch(lua_State* tolua_S)
+/* get function: pitch of class  Position */
+#ifndef TOLUA_DISABLE_tolua_get_Position_unsigned_pitch
+static int tolua_get_Position_unsigned_pitch(lua_State* tolua_S)
 {
-  position* self = (position*)  tolua_tousertype(tolua_S,1,0);
+  Position* self = (Position*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'pitch'",NULL);
 #endif
@@ -155,11 +155,11 @@ static int tolua_get_position_unsigned_pitch(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* set function: pitch of class  position */
-#ifndef TOLUA_DISABLE_tolua_set_position_unsigned_pitch
-static int tolua_set_position_unsigned_pitch(lua_State* tolua_S)
+/* set function: pitch of class  Position */
+#ifndef TOLUA_DISABLE_tolua_set_Position_unsigned_pitch
+static int tolua_set_Position_unsigned_pitch(lua_State* tolua_S)
 {
-  position* self = (position*)  tolua_tousertype(tolua_S,1,0);
+  Position* self = (Position*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'pitch'",NULL);
@@ -359,13 +359,13 @@ TOLUA_API int tolua_Structs_open (lua_State* tolua_S)
  tolua_reg_types(tolua_S);
  tolua_module(tolua_S,NULL,0);
  tolua_beginmodule(tolua_S,NULL);
-  tolua_cclass(tolua_S,"position","position","",NULL);
-  tolua_beginmodule(tolua_S,"position");
-   tolua_variable(tolua_S,"x",tolua_get_position_unsigned_x,tolua_set_position_unsigned_x);
-   tolua_variable(tolua_S,"y",tolua_get_position_unsigned_y,tolua_set_position_unsigned_y);
-   tolua_variable(tolua_S,"z",tolua_get_position_unsigned_z,tolua_set_position_unsigned_z);
-   tolua_variable(tolua_S,"heading",tolua_get_position_unsigned_heading,tolua_set_position_unsigned_heading);
-   tolua_variable(tolua_S,"pitch",tolua_get_position_unsigned_pitch,tolua_set_position_unsigned_pitch);
+  tolua_cclass(tolua_S,"Position","Position","",NULL);
+  tolua_beginmodule(tolua_S,"Position");
+   tolua_variable(tolua_S,"x",tolua_get_Position_unsigned_x,tolua_set_Position_unsigned_x);
+   tolua_variable(tolua_S,"y",tolua_get_Position_unsigned_y,tolua_set_Position_unsigned_y);
+   tolua_variable(tolua_S,"z",tolua_get_Position_unsigned_z,tolua_set_Position_unsigned_z);
+   tolua_variable(tolua_S,"heading",tolua_get_Position_unsigned_heading,tolua_set_Position_unsigned_heading);
+   tolua_variable(tolua_S,"pitch",tolua_get_Position_unsigned_pitch,tolua_set_Position_unsigned_pitch);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"block","block","",NULL);
   tolua_beginmodule(tolua_S,"block");

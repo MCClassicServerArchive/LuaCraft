@@ -1,10 +1,10 @@
-typedef struct _position {
-	unsigned short x;
-	unsigned short y;
-	unsigned short z;
+typedef struct _Position {
+	unsigned double x;
+	unsigned double y;
+	unsigned double z;
 	unsigned char heading;
 	unsigned char pitch;
-} position;
+} Position;
 
 typedef struct _block {
 	unsigned short x;

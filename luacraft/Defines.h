@@ -5,6 +5,8 @@
 
 #define PROTO_VER 0x07
 
+#define DEFSERV_DATA "LuaCraft rev118."
+
 #define PACK_CODE_IN_HANDSHAKE 0x00
 #define PACK_CODE_IN_BLOCK 0x05
 #define PACK_CODE_IN_MOVEMENT 0x08
@@ -37,7 +39,8 @@
 #define PACKLEN_OUT_DESPAWN 2
 #define PACKLEN_OUT_DISCONNECT 65
 #define PACKLEN_OUT_SENDBLOCK 8
-#define PACKLEN_OUT_MOVEANDHEAD 10
+#define PACKLEN_OUT_MOVEANDHEAD 7
+#define PACKLEN_OUT_TELEPORT 10
 #define PACKLEN_OUT_MOVE 5
 #define PACKLEN_OUT_HEADING 4
 
@@ -48,4 +51,16 @@
 #define PACK_SHORTLEN 2
 		//unsigned char 0xFF == -1
 
+#ifdef _WIN32
+	#ifdef _DEBUG
+		#define ENABLE_DEBUG
+		#define _CRTDBG_MAP_ALLOC
+		#include <stdlib.h>
+		#include <crtdbg.h>
+	#endif
+#define _CRT_SECURE_NO_WARNINGS
+#else
+	#define WaitForSingleObject(a, b) pthread_mutex_lock(&a)
+	#define ReleaseMutex(a) pthread_mutex_unlock(&a)
+#endif
 #endif

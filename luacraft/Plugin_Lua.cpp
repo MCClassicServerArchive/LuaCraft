@@ -1,6 +1,6 @@
 /*
 ** Lua binding: Plugin
-** Generated automatically by tolua++-1.0.92 on 04/10/10 13:06:05.
+** Generated automatically by tolua++-1.0.92 on 04/18/10 19:41:57.
 */
 
 #ifndef __cplusplus
@@ -84,6 +84,76 @@ static int tolua_Plugin_Plugin_AddHook00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'AddHook'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: AddChatCommand of class  Plugin */
+#ifndef TOLUA_DISABLE_tolua_Plugin_Plugin_AddChatCommand00
+static int tolua_Plugin_Plugin_AddChatCommand00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"Plugin",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  Plugin* self = (Plugin*)  tolua_tousertype(tolua_S,1,0);
+  const char* _command = ((const char*)  tolua_tostring(tolua_S,2,0));
+  const char* _function = ((const char*)  tolua_tostring(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'AddChatCommand'", NULL);
+#endif
+  {
+   self->AddChatCommand(_command,_function);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'AddChatCommand'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: SetTimeout of class  Plugin */
+#ifndef TOLUA_DISABLE_tolua_Plugin_Plugin_SetTimeout00
+static int tolua_Plugin_Plugin_SetTimeout00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"Plugin",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  Plugin* self = (Plugin*)  tolua_tousertype(tolua_S,1,0);
+  int seconds = ((int)  tolua_tonumber(tolua_S,2,0));
+  const char* _function = ((const char*)  tolua_tostring(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'SetTimeout'", NULL);
+#endif
+  {
+   self->SetTimeout(seconds,_function);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'SetTimeout'.",&tolua_err);
  return 0;
 #endif
 }
@@ -229,6 +299,8 @@ TOLUA_API int tolua_Plugin_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"Plugin");
    tolua_function(tolua_S,"Print",tolua_Plugin_Plugin_Print00);
    tolua_function(tolua_S,"AddHook",tolua_Plugin_Plugin_AddHook00);
+   tolua_function(tolua_S,"AddChatCommand",tolua_Plugin_Plugin_AddChatCommand00);
+   tolua_function(tolua_S,"SetTimeout",tolua_Plugin_Plugin_SetTimeout00);
    tolua_function(tolua_S,"SetName",tolua_Plugin_Plugin_SetName00);
    tolua_function(tolua_S,"GetName",tolua_Plugin_Plugin_GetName00);
    tolua_function(tolua_S,"Include",tolua_Plugin_Plugin_Include00);

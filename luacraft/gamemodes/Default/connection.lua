@@ -2,25 +2,27 @@
 function HandleConnect(player)
 	-- If the player is banned, kick their butt outta here
 	if IsBanned(player) then
+		player.WasKicked = true;
+		SERVER:SendChat(player:GetDisplayName().."&e has left the server!");
+		SERVER:SendChat(player:GetDisplayName().."&e has been kicked: You are banned!");
 		player:Kick("You are banned!");
 		return;
 	end
 
-	-- If the player is dag10, make them an OP (for testing purposes)
-	if player:GetName() == "dag10" then
+	-- If the player is in /cfg/ops.txt, OP them
+	if IsInOpList(player) then
 		player:SetOP(true);
-	end
-	
-	-- If they're an OP, make their name color for chat different
-	if player:GetOP() then
 		player.Color = "&9";
 	else
 		player.Color = "&f";
 	end
 	
 	-- Spawn them in the main world
-	if player:SetWorld("main") == 0 then
-		print("WARNING: Failed to set world \"main\" for ["..player:GetName().."]");
+	if player:SetWorld(DefaultWorld) == 0 then
+		print("WARNING: Failed to set world \""..DefaultWorld.."\" for ["..player:GetName().."]");
+		player.WasKicked = true;
+		SERVER:SendChat(player:GetDisplayName().."&e has left the server!");
+		SERVER:SendChat(player:GetDisplayName().."&e has been kicked: Invalid World!");
 		player:Kick("Invalid World!");
 		return;
 	end
@@ -29,10 +31,10 @@ function HandleConnect(player)
 	player:SetDisplayName(player.Color..player:GetName());
 	
 	-- Print that they joined to the server console
-	print("Player ["..player:GetName().."] has joined the game. ["..player:GetIP().."]");
+	print("Player ["..player:GetName().."] has joined the server. ["..player:GetIP().."]");
 	
 	-- Tell all players in their world that they joined
-	SERVER:SendChat(player:GetDisplayName().."&e has joined the game!")
+	SERVER:SendChat(player:GetDisplayName().."&e has joined the server!")
 	
 	-- Send a welome message to them
 	player:SendMessage("&aWelcome to &eLuaCraft&a, "..player:GetName().."!");
@@ -43,9 +45,12 @@ GAMEMODE:AddHook("OnPlayerJoin", "HandleConnect");
 -- On player disconnect
 function HandleDisconnect(player)
 	-- Print that they left to the server console
-	print("Player ["..player:GetName().."] has left the game. ["..player:GetIP().."]");
+	print("Player ["..player:GetName().."] has left the server. ["..player:GetIP().."]");
+	
+	-- Don't send this message to in-game players
+	if player.WasKicked then return end;
 	
 	-- Tell all players in their world that they left
-	SERVER:SendChat(player:GetDisplayName().."&e has left the game!")
+	SERVER:SendChat(player:GetDisplayName().."&e has left the server!");
 end
 GAMEMODE:AddHook("OnPlayerLeave", "HandleDisconnect");

@@ -9,9 +9,11 @@ function HandleChat(player)
 	-- Parse text for command
 	if chatMsg == "/remember" then
 		player:SendMessage("&e"..rememberText);
+		player:SupressChat();
 	elseif chatMsg:sub(1,10) == "/remember " then
 		rememberText = chatMsg:sub(11);
 		player:SendMessage("&9Saved:&f "..rememberText:sub(1,-1));
+		player:SupressChat();
 	end
 	
 end

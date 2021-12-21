@@ -1,6 +1,6 @@
 /*
 ** Lua binding: Player
-** Generated automatically by tolua++-1.0.92 on 04/07/10 19:53:36.
+** Generated automatically by tolua++-1.0.92 on 04/19/10 18:36:44.
 */
 
 #ifndef __cplusplus
@@ -24,6 +24,13 @@ static int tolua_collect_block (lua_State* tolua_S)
 	Mtolua_delete(self);
 	return 0;
 }
+
+static int tolua_collect_Position (lua_State* tolua_S)
+{
+ Position* self = (Position*) tolua_tousertype(tolua_S,1,0);
+	Mtolua_delete(self);
+	return 0;
+}
 #endif
 
 
@@ -32,7 +39,7 @@ static void tolua_reg_types (lua_State* tolua_S)
 {
  tolua_usertype(tolua_S,"Player");
  tolua_usertype(tolua_S,"block");
- tolua_usertype(tolua_S,"position");
+ tolua_usertype(tolua_S,"Position");
 }
 
 /* method: GetLastChat of class  Player */
@@ -542,8 +549,18 @@ static int tolua_Player_Player_GetPos00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'GetPos'", NULL);
 #endif
   {
-   position* tolua_ret = (position*)  self->GetPos();
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"position");
+   Position tolua_ret = (Position)  self->GetPos();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = Mtolua_new((Position)(tolua_ret));
+     tolua_pushusertype(tolua_S,tolua_obj,"Position");
+    tolua_register_gc(tolua_S,lua_gettop(tolua_S));
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(Position));
+     tolua_pushusertype(tolua_S,tolua_obj,"Position");
+    tolua_register_gc(tolua_S,lua_gettop(tolua_S));
+#endif
+   }
   }
  }
  return 1;
@@ -574,8 +591,18 @@ static int tolua_Player_Player_GetNewPos00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'GetNewPos'", NULL);
 #endif
   {
-   position* tolua_ret = (position*)  self->GetNewPos();
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"position");
+   Position tolua_ret = (Position)  self->GetNewPos();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = Mtolua_new((Position)(tolua_ret));
+     tolua_pushusertype(tolua_S,tolua_obj,"Position");
+    tolua_register_gc(tolua_S,lua_gettop(tolua_S));
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(Position));
+     tolua_pushusertype(tolua_S,tolua_obj,"Position");
+    tolua_register_gc(tolua_S,lua_gettop(tolua_S));
+#endif
+   }
   }
  }
  return 1;
@@ -606,7 +633,7 @@ static int tolua_Player_Player_GetX00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'GetX'", NULL);
 #endif
   {
-   short tolua_ret = (short)  self->GetX();
+   double tolua_ret = (double)  self->GetX();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -638,7 +665,7 @@ static int tolua_Player_Player_GetY00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'GetY'", NULL);
 #endif
   {
-   short tolua_ret = (short)  self->GetY();
+   double tolua_ret = (double)  self->GetY();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -670,7 +697,7 @@ static int tolua_Player_Player_GetZ00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'GetZ'", NULL);
 #endif
   {
-   short tolua_ret = (short)  self->GetZ();
+   double tolua_ret = (double)  self->GetZ();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -702,7 +729,7 @@ static int tolua_Player_Player_GetNewX00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'GetNewX'", NULL);
 #endif
   {
-   short tolua_ret = (short)  self->GetNewX();
+   double tolua_ret = (double)  self->GetNewX();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -734,7 +761,7 @@ static int tolua_Player_Player_GetNewY00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'GetNewY'", NULL);
 #endif
   {
-   short tolua_ret = (short)  self->GetNewY();
+   double tolua_ret = (double)  self->GetNewY();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -766,7 +793,7 @@ static int tolua_Player_Player_GetNewZ00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'GetNewZ'", NULL);
 #endif
   {
-   short tolua_ret = (short)  self->GetNewZ();
+   double tolua_ret = (double)  self->GetNewZ();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -787,7 +814,7 @@ static int tolua_Player_Player_SetPos00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"Player",0,&tolua_err) ||
-     !tolua_isusertype(tolua_S,2,"position",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,2,"Position",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
@@ -795,7 +822,7 @@ static int tolua_Player_Player_SetPos00(lua_State* tolua_S)
 #endif
  {
   Player* self = (Player*)  tolua_tousertype(tolua_S,1,0);
-  position* posToSet = ((position*)  tolua_tousertype(tolua_S,2,0));
+  Position* posToSet = ((Position*)  tolua_tousertype(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'SetPos'", NULL);
 #endif
@@ -828,7 +855,7 @@ static int tolua_Player_Player_SetX00(lua_State* tolua_S)
 #endif
  {
   Player* self = (Player*)  tolua_tousertype(tolua_S,1,0);
-  short xToSet = ((short)  tolua_tonumber(tolua_S,2,0));
+  double xToSet = ((double)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'SetX'", NULL);
 #endif
@@ -861,7 +888,7 @@ static int tolua_Player_Player_SetY00(lua_State* tolua_S)
 #endif
  {
   Player* self = (Player*)  tolua_tousertype(tolua_S,1,0);
-  short yToSet = ((short)  tolua_tonumber(tolua_S,2,0));
+  double yToSet = ((double)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'SetY'", NULL);
 #endif
@@ -894,7 +921,7 @@ static int tolua_Player_Player_SetZ00(lua_State* tolua_S)
 #endif
  {
   Player* self = (Player*)  tolua_tousertype(tolua_S,1,0);
-  short zToSet = ((short)  tolua_tonumber(tolua_S,2,0));
+  double zToSet = ((double)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'SetZ'", NULL);
 #endif
@@ -919,7 +946,7 @@ static int tolua_Player_Player_Teleport00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"Player",0,&tolua_err) ||
-     !tolua_isusertype(tolua_S,2,"position",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,2,"Position",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
@@ -927,7 +954,7 @@ static int tolua_Player_Player_Teleport00(lua_State* tolua_S)
 #endif
  {
   Player* self = (Player*)  tolua_tousertype(tolua_S,1,0);
-  position* targetPos = ((position*)  tolua_tousertype(tolua_S,2,0));
+  Position* targetPos = ((Position*)  tolua_tousertype(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'Teleport'", NULL);
 #endif
@@ -1293,6 +1320,70 @@ static int tolua_Player_Player_GetLastBlock00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: SetMOTD of class  Player */
+#ifndef TOLUA_DISABLE_tolua_Player_Player_SetMOTD00
+static int tolua_Player_Player_SetMOTD00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"Player",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  Player* self = (Player*)  tolua_tousertype(tolua_S,1,0);
+  const char* motd = ((const char*)  tolua_tostring(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'SetMOTD'", NULL);
+#endif
+  {
+   self->SetMOTD(motd);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'SetMOTD'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: SupressChat of class  Player */
+#ifndef TOLUA_DISABLE_tolua_Player_Player_SupressChat00
+static int tolua_Player_Player_SupressChat00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"Player",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  Player* self = (Player*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'SupressChat'", NULL);
+#endif
+  {
+   self->SupressChat();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'SupressChat'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* Open function */
 TOLUA_API int tolua_Player_open (lua_State* tolua_S)
 {
@@ -1340,6 +1431,8 @@ TOLUA_API int tolua_Player_open (lua_State* tolua_S)
    tolua_function(tolua_S,"GetString",tolua_Player_Player_GetString00);
    tolua_function(tolua_S,"SendBlockChange",tolua_Player_Player_SendBlockChange00);
    tolua_function(tolua_S,"GetLastBlock",tolua_Player_Player_GetLastBlock00);
+   tolua_function(tolua_S,"SetMOTD",tolua_Player_Player_SetMOTD00);
+   tolua_function(tolua_S,"SupressChat",tolua_Player_Player_SupressChat00);
   tolua_endmodule(tolua_S);
  tolua_endmodule(tolua_S);
  return 1;

@@ -122,15 +122,15 @@ public:
 	}
 
 	inline unsigned short getDimX() {
-		return bDimX;
+		return lDimX;
 	}
 
 	inline unsigned short getDimY() {
-		return bDimY;
+		return lDimY;
 	}
 	
 	inline unsigned short getDimZ() {
-		return bDimZ;
+		return lDimZ;
 	}
 	
 	inline unsigned short getSpawnX() {

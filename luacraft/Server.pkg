@@ -15,7 +15,23 @@ class Server {
 	void SendChat(const char *message);
 	void SendChat(const char *message, const char *world);
 	
-	void sendMove(Player *player);
+	void SendMove(Player *player);
+	void PlaceBlock(block nblock, char* world);
+	block GetBlock(char *world, short x, short y, short z);
 	
-	void sendBlock(block nblock, char* world);
+	int GetWorldSizeX(char *world);
+	int GetWorldSizeY(char *world);
+	int GetWorldSizeZ(char *world);
+
+	char *GetName();
+	char *GetMotd();
+	void SetName(const char *name);
+	void SetMotd(const char *motd);
+
+	int NumPlayers();
+	int NumPlayersInWorld(const char *world);
+	int MaxPlayers();
+	
+	Zone *CreateZone(char *_world, block _block1, block _block2);
+	bool DeleteZone(Zone *_zone);
 };

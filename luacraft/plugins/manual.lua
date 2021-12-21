@@ -80,6 +80,7 @@ function HandleChat(player)
 		if SupressConsole == 0 then
 			print(player:GetName().." used Man on "..chatmsg:sub(6, string.len(chatmsg)));
 		end
+		player:SupressChat();
 	end
 end
 PLUGIN:AddHook("OnPlayerChat", "HandleChat");

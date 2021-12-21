@@ -211,6 +211,10 @@
 				RelativePath=".\Various.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\Zone.cpp"
+				>
+			</File>
 			<Filter
 				Name="Lua"
 				>
@@ -232,6 +236,10 @@
 				</File>
 				<File
 					RelativePath=".\Structs_Lua.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Zone_Lua.cpp"
 					>
 				</File>
 			</Filter>
@@ -274,6 +282,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Server.h"
 				>
 			</File>
@@ -287,6 +299,10 @@
 			</File>
 			<File
 				RelativePath=".\Various.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Zone.h"
 				>
 			</File>
 			<Filter
@@ -312,6 +328,10 @@
 					RelativePath=".\Structs_Lua.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Zone_Lua.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -319,6 +339,14 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath="..\lc_64x64.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\luacraft.rc"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="toLua++ Pkgs"
@@ -341,6 +369,10 @@
 			</File>
 			<File
 				RelativePath=".\Structs.pkg"
+				>
+			</File>
+			<File
+				RelativePath=".\Zone.pkg"
 				>
 			</File>
 		</Filter>

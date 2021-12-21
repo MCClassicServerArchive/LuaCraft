@@ -1,6 +1,6 @@
 /*
 ** Lua binding: Plugin
-** Generated automatically by tolua++-1.0.92 on 04/10/10 13:06:05.
+** Generated automatically by tolua++-1.0.92 on 04/18/10 19:41:57.
 */
 
 /* Exported function */

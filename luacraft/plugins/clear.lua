@@ -10,6 +10,7 @@ function HandleChat(player)
 		for i = 0, 35 do
 			player:SendMessage("");
 		end
+		player:SupressChat();
 	end
 	
 end

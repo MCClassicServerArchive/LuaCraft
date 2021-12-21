@@ -1,7 +1,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <cstring>
 #include "Config.h"
+#include "Defines.h"
 
 void *Config::getOption(const char *name, bool addIfMissing, const char *_default, const char *comment) {
 	char config_buf[128], *_name;

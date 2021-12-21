@@ -1,6 +1,6 @@
 /*
 ** Lua binding: Structs
-** Generated automatically by tolua++-1.0.92 on 04/07/10 19:53:40.
+** Generated automatically by tolua++-1.0.92 on 04/19/10 16:32:56.
 */
 
 /* Exported function */

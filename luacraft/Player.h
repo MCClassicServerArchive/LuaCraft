@@ -10,11 +10,14 @@
 	============================================ */
 
 #include "Network.h"
-#include "Defines.h"
 #include "Level.h"
 #include "Server.h"
 #include "Structs.h"
 #include "Level.h"
+
+#ifndef _WIN32
+	#include <pthread.h>
+#endif
 
 struct PendingPacket {
 	int length;
@@ -24,7 +27,6 @@ struct PendingPacket {
 		length = _length;
 		data = _data;
 		freeData = _freeData;
-		//Console::PrintText("Created PendingPacket!");
 	}
 };
 
@@ -70,13 +72,21 @@ public:
 
 	void addLocalPlayer(class Player *player);
 	void removeLocalPlayer(class Player *player);
+#ifdef _WIN32
 	HANDLE localListMutex;
+#else
+	pthread_mutex_t localListMutex;
+#endif
 
 	Level *level;
 	char *levelStr;
 
 	std::vector<PendingPacket*> PacketQueue;
+#ifdef _WIN32
 	HANDLE packetQueueMutex;
+#else
+	pthread_mutex_t packetQueueMutex;
+#endif
 
 	char *DisplayName;
 
@@ -96,6 +106,7 @@ public:
 	bool GetOP();
 	void SetOP(bool OP);
 
+	void Kill();
 	void Kick(const char *msg);
 	bool pendingRelease;
 
@@ -104,7 +115,6 @@ public:
 
 	char *GetLastChat();
 	void SendMessage(const char *message);
-	bool sendMovement(unsigned char id_byte, position oldpos, position newpos_other);
 
 	bool SendBlockChange(block nblock);
 	block GetLastBlock();
@@ -112,21 +122,21 @@ public:
 	void SetVisible(bool state);
 	bool IsVisible();
 
-	position *GetPos();
-	position *GetNewPos();
-	short GetX();
-	short GetY();
-	short GetZ();
-	short GetNewX();
-	short GetNewY();
-	short GetNewZ();
+	Position GetPos();
+	Position GetNewPos();
+	double GetX();
+	double GetY();
+	double GetZ();
+	double GetNewX();
+	double GetNewY();
+	double GetNewZ();
 
-	void SetPos(position *posToSet);
-	void SetX(short xToSet);
-	void SetY(short yToSet);
-	void SetZ(short zToSet);
+	void SetPos(Position *posToSet);
+	void SetX(double xToSet);
+	void SetY(double yToSet);
+	void SetZ(double zToSet);
 
-	void Teleport(position *targetPos);
+	void Teleport(Position *targetPos);
 	void SendToPlayer(Player *targetPly);
 	void Hide(bool state);
 
@@ -143,6 +153,14 @@ public:
 
 	bool sendSpawnPack(unsigned char id_byte, char *name, position pos);
 	bool sendDespawnPack(unsigned char id_byte);
+	bool sendMovementHeadRot(unsigned char id_byte, position delta);
+	bool sendMovementRot(unsigned char id_byte, position delta);
+	bool sendMovementHead(unsigned char id_byte, position delta);
+	bool sendMovementTeleport(unsigned char id_byte, position newpos_other);
+
+	void SetMOTD(const char *motd);
+	bool supressChat;
+	void SupressChat();
 
 private:
 	PlayerBool *bools_front;
@@ -154,8 +172,9 @@ private:
 	PlayerString *strings_front;
 	PlayerString *strings_back;
 
-	bool can_recv;
 	bool has_map;
+	bool is_initialized;
+	bool self_destruct;
 
 	unsigned char id;
 	bool op;
@@ -165,7 +184,7 @@ private:
 	char *name;
 	position pos;
 	position newpos;
-	position savedpos;
+	Position savedpos;
 	block blockpos;
 	SOCKET sock;
 
@@ -184,9 +203,6 @@ private:
 	bool sendWelcome();
 	bool sendLevel(Level *lvl);
 	bool sendSpawns();
-	bool sendMovementHeadRot(unsigned char id_byte, position oldpos, position newpos_other);
-	bool sendMovementRot(unsigned char id_byte, position oldpos, position newpos_other);
-	bool sendMovementHead(unsigned char id_byte, position oldpos, position newpos_other);
 
 	bool sendPacket(const char *packet, int length);
 

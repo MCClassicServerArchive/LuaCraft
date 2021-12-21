@@ -8,6 +8,7 @@ function HandleChat(player)
 	-- Rand command
 	if chatMsg == "/rand" then
 		player:SendMessage("A random number is: "..math.random());
+		player:SupressChat();
 	end
 	
 end

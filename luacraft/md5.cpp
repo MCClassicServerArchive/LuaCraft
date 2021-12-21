@@ -29,6 +29,7 @@
 #include <cstring>
 #include <climits>
 #include "md5.h"
+#include "Defines.h"
 
 static void process_block(md5_t *md5_p, const void *buffer, const unsigned int buf_len) {
 	unsigned int correct[16];
