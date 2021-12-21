@@ -1,0 +1,16 @@
+typedef struct _position {
+	unsigned short x;
+	unsigned short y;
+	unsigned short z;
+	unsigned char heading;
+	unsigned char pitch;
+} position;
+
+typedef struct _block {
+	unsigned short x;
+	unsigned short y;
+	unsigned short z;
+	unsigned char blocktype;
+	unsigned char mode;
+	unsigned char levelblock;
+} block;

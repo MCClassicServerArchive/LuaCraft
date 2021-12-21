@@ -1,0 +1,54 @@
+class Player {
+	char *GetLastChat();
+	void SendMessage(const char *message);
+	
+	char *GetIP();
+
+	char *GetName();
+	void SetName(const char *name);
+	char *GetDisplayName();
+	void SetDisplayName(const char *name);
+
+	int GetID();
+
+	bool GetOP();
+	void SetOP(bool OP);
+
+	void Kick(const char *msg);
+
+	bool SetWorld(const char *worldName);
+	char *GetWorld();
+	
+	void SetVisible(bool state);
+	bool IsVisible();
+
+	position *GetPos();
+	position *GetNewPos();
+	short GetX();
+	short GetY();
+	short GetZ();
+	short GetNewX();
+	short GetNewY();
+	short GetNewZ();
+
+	void SetPos(position *posToSet);
+	void SetX(short xToSet);
+	void SetY(short yToSet);
+	void SetZ(short zToSet);
+
+	void Teleport(position *targetPos);
+	void SendToPlayer(Player *targetPly);
+	void Hide(bool state);
+
+	void SetBool(char *name, bool value);
+	bool GetBool(char *name);
+
+	void SetNumber(char *name, double value);
+	double GetNumber(char *name);
+
+	void SetString(char *name, char *value);
+	char *GetString(char *name);
+	
+	bool SendBlockChange(block nblock);
+	block GetLastBlock();
+};

@@ -1,0 +1,11 @@
+class Level {
+	//Level(const char *fileName, bool restore);
+	Level(const char *fileName);
+	~Level();
+
+	//bool loadMap(const char *fileName, bool restore);
+	
+	void Save();
+	void SaveAs(const char *saveAsName);
+	void SetSpawn(position pos);
+};

@@ -1,0 +1,12 @@
+# Add the name of your plugin below, one per line.
+# Example: Ranks
+# That example would load the plugin: plugins/Ranks.lua
+# Anything after a # is ignored.
+
+clear
+manual
+pm
+random
+remember
+shutdown
+unloader

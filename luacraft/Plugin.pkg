@@ -1,0 +1,8 @@
+class Plugin {
+	void Print(const char* msg);
+	void AddHook(const char *_hook, const char *_function);
+	void SetName(const char *_name);
+	char *GetName();
+	void Include(const char *_file);
+	void Unload();
+};

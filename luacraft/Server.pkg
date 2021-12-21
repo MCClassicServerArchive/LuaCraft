@@ -1,0 +1,21 @@
+class Server {
+	
+	bool Quit;
+
+	void CreateWorld(const char *worldName, const char *fileName);
+	Level *GetLevelByName(const char *worldName);
+	void DeleteWorld(const char *worldName);
+
+	char *GetGamemodeName();
+	void GetPluginByName(const char *pluginName);
+	void LoadPlugin(const char *fileName);
+	
+	Player *GetPlayerByName(const char *name);
+	
+	void SendChat(const char *message);
+	void SendChat(const char *message, const char *world);
+	
+	void sendMove(Player *player);
+	
+	void sendBlock(block nblock, char* world);
+};
